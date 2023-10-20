@@ -5,66 +5,54 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+
     PhotonView m_View;
 
-    public float moveSpeed = 1f;
+    public float moveSpeed = 2;
 
-    private float movementX, movementY;
-
-    private int health = 100;
+    private float movement;
 
     // Start is called before the first frame update
     void Start()
     {
         m_View = GetComponent<PhotonView>();
 
-        if (!m_View.IsMine)
+        if (m_View.IsMine)
         {
-            GetComponent<Renderer>().material.color = Color.blue;
+            if (PhotonNetwork.IsMasterClient)
+            {
+                transform.position = new Vector3(-7, 0, 0);
+                InvokeRepeating("PlayerControl", 0, 0.5f);
+            }
+            else if(!PhotonNetwork.IsMasterClient)
+            {
+                transform.position = new Vector3(7, 0, 0);
+            }
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (m_View.IsMine)
+        if(m_View.IsMine)
         {
             MovePlayer();
-            Shoot();
+        }
+    }
+
+    void PlayerControl()
+    {
+        if(PhotonNetwork.PlayerList.Length == 2)
+        {
+            GameObject.Find("Ball").GetComponent<PhotonView>().RPC("GameStart", RpcTarget.All, null);
+            CancelInvoke("PlayerControl");
         }
     }
 
     void MovePlayer()
     {
-        movementX = Input.GetAxisRaw("Horizontal") * moveSpeed * Time.deltaTime;
-        movementY = Input.GetAxisRaw("Vertical") * moveSpeed * Time.deltaTime;
-
-        transform.Translate(movementX, 0, movementY);
+        movement = Input.GetAxisRaw("Vertical") * moveSpeed * Time.deltaTime;
+        transform.Translate(0, movement, 0);
     }
 
-    void Shoot()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            RaycastHit hit;
-
-            if(Physics.Raycast(transform.position, transform.forward, out hit, 100.0f))
-            {
-                hit.collider.gameObject.GetComponent<PhotonView>().RPC("DestroyObject", RpcTarget.All, 25);
-            }
-        }
-    }
-
-    [PunRPC]
-    public void DestroyObject(int damage)
-    {
-        health -= damage;
-        Debug.Log(health);
-
-        if(health <= 0)
-        {
-            PhotonNetwork.Destroy(gameObject);
-        }
-    }
-
-}
+} // class

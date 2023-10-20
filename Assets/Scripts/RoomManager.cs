@@ -40,7 +40,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
         base.OnJoinedRoom();
         Debug.Log("A player has entered the room.");
 
-        GameObject player = PhotonNetwork.Instantiate("Cube", Vector3.zero, Quaternion.identity);
+        GameObject player = PhotonNetwork.Instantiate("Player", Vector3.zero, Quaternion.identity);
+
+        player.GetComponent<PhotonView>().Owner.NickName = "Player " + Random.Range(1, 100);
     }
 
 }
