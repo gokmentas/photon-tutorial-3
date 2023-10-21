@@ -21,12 +21,14 @@ public class PlayerMovement : MonoBehaviour
         {
             if (PhotonNetwork.IsMasterClient)
             {
-                transform.position = new Vector3(-7, 0, 0);
+                transform.localPosition = new Vector3(-7, 6, 0);
                 InvokeRepeating("PlayerControl", 0, 0.5f);
+                transform.rotation = Quaternion.Euler(0, 90, 90);
             }
             else if(!PhotonNetwork.IsMasterClient)
             {
-                transform.position = new Vector3(7, 0, 0);
+                transform.localPosition = new Vector3(7, 6, 0);
+                transform.rotation = Quaternion.Euler(0, 90, 90);
             }
         }
     }
@@ -52,7 +54,9 @@ public class PlayerMovement : MonoBehaviour
     void MovePlayer()
     {
         movement = Input.GetAxisRaw("Vertical") * moveSpeed * Time.deltaTime;
+    
         transform.Translate(0, movement, 0);
+        transform.position = new Vector3(transform.position.x, transform.position.y, Mathf.Clamp(transform.position.z, -3.75f, 3.75f));
     }
 
 } // class

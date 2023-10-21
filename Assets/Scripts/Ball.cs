@@ -20,7 +20,25 @@ public class Ball : MonoBehaviour
     {
         pw = GetComponent<PhotonView>();
         rb = GetComponent<Rigidbody>();
+
+        //StartCoroutine(ApplyRandomForceAfterDelay(5f));
     }
+
+    //private IEnumerator ApplyRandomForceAfterDelay(float delay)
+    //{
+    //    yield return new WaitForSeconds(delay);
+
+    //    // Check if the ball is still in play (not scored)
+    //    if (pw.IsMine && gameObject.activeSelf)
+    //    {
+    //        // Apply a random force to the ball
+    //        Vector3 randomForce = new Vector3(Random.Range(-10f, 10f), 0f, Random.Range(-10f, 10f));
+    //        rb.AddForce(randomForce, ForceMode.Impulse);
+
+    //        // Restart the coroutine to apply random force after another 5 seconds
+    //        StartCoroutine(ApplyRandomForceAfterDelay(5f));
+    //    }
+    //}
 
     // Update is called once per frame
     void Update()
@@ -31,14 +49,15 @@ public class Ball : MonoBehaviour
     [PunRPC]
     public void GameStart()
     {
-        rb.velocity = new Vector3(5, 5, 0);
+        Vector3 randomForce = new Vector3(Random.Range(-10f, 10f), 0f, Random.Range(-10f, 10f));
+        rb.AddForce(randomForce, ForceMode.Impulse);
         ShowScore();
     }
 
     public void ShowScore()
     {
         player_1_score_text.text = PhotonNetwork.PlayerList[0].NickName + " : " + player_1_score;
-        player_1_score_text.text = PhotonNetwork.PlayerList[0].NickName + " : " + player_1_score;
+        player_2_score_text.text = PhotonNetwork.PlayerList[1].NickName + " : " + player_2_score;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -56,6 +75,7 @@ public class Ball : MonoBehaviour
         }
     }
 
+    [PunRPC]
     public void Score(int player_1, int player_2)
     {
         player_1_score += player_1;
@@ -69,7 +89,13 @@ public class Ball : MonoBehaviour
     {
         rb.velocity = Vector3.zero;
         transform.position = Vector3.zero;
-        rb.velocity = new Vector3(5, 5, 0);
+        StartCoroutine(ResetBallVelocityAfterDelay(0.1f)); // Delay the velocity reset for a short duration
+    }
+
+    private IEnumerator ResetBallVelocityAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        rb.velocity = new Vector3(5, 0, 5);
     }
 
 }
